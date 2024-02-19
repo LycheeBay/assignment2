@@ -9,6 +9,7 @@
 typedef bit<48> macAddr_t;
 header ethernet_t {
     /* TODO: Define ethernet header*/ 
+    header ethernet_t;
 }
 
 /* digest format for mac learning*/
