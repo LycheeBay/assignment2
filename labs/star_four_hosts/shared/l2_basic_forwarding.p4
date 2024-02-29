@@ -7,9 +7,12 @@
 *************************************************************************/
 
 typedef bit<48> macAddr_t;
+typedef bit<32> ip4Addr_t;
 header ethernet_t {
     /* TODO: Define ethernet header*/ 
-    header ethernet_t;
+    macAddr_t dst;
+    macAddr_t src;
+    bit<16>   etherType;
 }
 
 /* digest format for mac learning*/
@@ -85,6 +88,16 @@ control MyIngress(inout headers hdr,
         /* TODO: define key, actions, and default action for the table */ 
         size = 4;
         support_timeout = true;
+
+        key = { standard_metadata.ingress_port: exact; }
+
+        actions = {
+            if () {
+                forward_to_port();
+            }
+        }
+
+        default_action = broadcast();
     }
 
     /* check if the port=>mac mapping exists */
@@ -92,6 +105,8 @@ control MyIngress(inout headers hdr,
         /* TODO: define key, actions, and default action for the table */  
         size = 4;
         support_timeout = true;
+
+        
     }
 
     /* applying tables */
