@@ -101,7 +101,7 @@ control MyIngress(inout headers hdr,
             forward_to_port;
         }
 
-        default_action = broadcast();
+        default_action = broadcast;
     }
 
     /* check if the port=>mac mapping exists */
@@ -115,7 +115,7 @@ control MyIngress(inout headers hdr,
         action = {}
 
         default_action = {
-            learn();
+            learn;
         }
     }
 
