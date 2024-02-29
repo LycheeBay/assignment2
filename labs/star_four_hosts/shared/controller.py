@@ -77,6 +77,9 @@ def main(p4info_file_path, bmv2_file_path):
                 # 1. Use p4info_helper's buildTableEntry() method to build a table_entry
                 # 2. Set timeout by setting table_entry.idle_timeout_ns
                 # 3. Add the table_entry to the switch by calling s1's WriteTableEntry() method
+                smac_table_entry = buildTableEntry("MyIngress.smac_table", match_fields = {"MAC Address": eth_src_addr})
+                dmac_forward_entry = buildTableEntry("MyIngress.dmac_forward", match_fields = {"MAC Address": eth_src_addr})
+
                 
             elif (digest_type == 'idle_timeout_notification'):
                 # Handle timeout

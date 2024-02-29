@@ -17,7 +17,8 @@ header ethernet_t {
 
 /* digest format for mac learning*/
 struct mac_learn_digest_t {
-    /* TODO */ 
+    macAddr_t srcMAC;
+    bit<9>    port;
 }
 
 struct metadata {
@@ -79,6 +80,9 @@ control MyIngress(inout headers hdr,
         mac_learn_digest_t mac_learn_msg;
         /* TODO: Fill the digest message with srcMAC and ingress port */
         
+        mac_learn_msg.srcMAC = hdr.src;
+        mac_learn_msg.port   = standard_metadata.ingress_port;
+
         /* send the digest message to the controller */
         digest<mac_learn_digest_t>(1, mac_learn_msg);
     }
@@ -89,12 +93,12 @@ control MyIngress(inout headers hdr,
         size = 4;
         support_timeout = true;
 
+        // Check whether the destination MAC address has a MAC-to_port_mapping
+        // how do we check? what is the mac-to-port mapping?
         key = { standard_metadata.ingress_port: exact; }
 
         actions = {
-            if () {
-                forward_to_port();
-            }
+            forward_to_port;
         }
 
         default_action = broadcast();
@@ -106,7 +110,13 @@ control MyIngress(inout headers hdr,
         size = 4;
         support_timeout = true;
 
-        
+        key = { standard_metadata.ingress_port: exact; }
+
+        action = {}
+
+        default_action = {
+            learn();
+        }
     }
 
     /* applying tables */
