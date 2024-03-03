@@ -110,13 +110,11 @@ control MyIngress(inout headers hdr,
         size = 4;
         support_timeout = true;
 
-        key = { standard_metadata.ingress_port: exact; }
+        key = { standard_metadata.ingress_port: exact;  standard_metadata. }
 
-        action = {}
+        actions = { NoAction; }
 
-        default_action = {
-            learn;
-        }
+        default_action = learn;
     }
 
     /* applying tables */
