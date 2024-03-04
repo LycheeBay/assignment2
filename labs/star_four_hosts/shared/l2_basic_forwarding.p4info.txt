@@ -9,8 +9,8 @@ tables {
   }
   match_fields {
     id: 1
-    name: "standard_metadata.ingress_port"
-    bitwidth: 9
+    name: "hdr.ethernet.dst"
+    bitwidth: 48
     match_type: EXACT
   }
   action_refs {
@@ -30,8 +30,8 @@ tables {
   }
   match_fields {
     id: 1
-    name: "standard_metadata.ingress_port"
-    bitwidth: 9
+    name: "hdr.ethernet.src"
+    bitwidth: 48
     match_type: EXACT
   }
   action_refs {

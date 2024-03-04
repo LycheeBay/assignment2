@@ -358,8 +358,8 @@
           "key" : [
             {
               "match_type" : "exact",
-              "name" : "standard_metadata.ingress_port",
-              "target" : ["standard_metadata", "ingress_port"],
+              "name" : "hdr.ethernet.src",
+              "target" : ["ethernet", "src"],
               "mask" : null
             }
           ],
@@ -395,8 +395,8 @@
           "key" : [
             {
               "match_type" : "exact",
-              "name" : "standard_metadata.ingress_port",
-              "target" : ["standard_metadata", "ingress_port"],
+              "name" : "hdr.ethernet.dst",
+              "target" : ["ethernet", "dst"],
               "mask" : null
             }
           ],
