@@ -88,6 +88,16 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
         /* TODO: verify checksum using verify_checksum() extern */
         /* Use HashAlgorithm.csum16 as a hash algorithm */ 
+        verify_checksum(true, {
+            hdr.ipv4.ver,
+            hdr.ipv4.hlen,
+            hdr.ipv4.flags,
+            hdr.ipv4.id,
+            hdr.ipv4.len,
+            hdr.ipv4.srcIP,
+            hdr.ipv4.dstIP
+        }, hdr.ipv4.checksum, HashAlgorithm.csum16);
+
     }
 }
 
@@ -108,6 +118,8 @@ control MyIngress(inout headers hdr,
     action forward_to_port(bit<9> egress_port, macAddr_t egress_mac) {
         /* TODO: change the packet's source MAC address to egress_mac */
         /* Then set the egress port in the packet's standard_metadata to egress_port */
+        hdr.ethernet.src = egress_mac;
+        standard_metadata.egress_port = egress_port;
     }
    
     action decrement_ttl() {
@@ -117,10 +129,12 @@ control MyIngress(inout headers hdr,
 
     action forward_to_next_hop(ipAddr_t next_hop){
         /* TODO: write next_hop to metadata's next_hop field */
+        metadata.next_hop = next_hop;
     }
 
     action change_dst_mac (macAddr_t dst_mac) {
         /* TODO: change a packet's destination MAC address to dst_mac*/
+        hdr.ethernet.dst = dst_mac;
     }
 
     /* define routing table */

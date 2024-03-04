@@ -53,19 +53,25 @@ def main(p4info_file_path, bmv2_file_path, routing_info):
                 # They represent the prefix of dstIP to next hop IP mapping.
                 # 1. Use p4info_helper's buildTableEntry() method to build a table_entry
                 # 2. Add the table_entry to the switch by calling s1's WriteTableEntry() method
+                ipv4_route_table_entry = p4info_helper.buildTableEntry("myIngress.ipv4_route", match_fields = {"hdr.ipv4.dstIP": prefix}, action_name = "myIngress.forward_to_next_hop", action_params = {"next_hop": next_hop_ip})
+                s1.WriteTableEntry(ipv4_route_table_entry)
                 
                 print ("Add ARP table entry", next_hop_ip,next_hop_mac)
                 # TODO: Add table entries to "MyIngress.arp_table"
                 # They represent the next hop IP to dstMAC mapping.
                 # 1. Use p4info_helper's buildTableEntry() method to build a table_entry
                 # 2. Add the table_entry to the switch by calling s1's WriteTableEntry() method
+                arp_table_entry = p4info_helper.buildTableEntry("myIngress.arp_table", match_fields = {"meta.next_hop": next_hop_ip}, action_name = "change_dst_mac", action_params = {"dst_mac": next_hop_mac})
+                s1.WriteTableEntry(arp_table_entry)
                 
                 print ("Add MAC table entry", next_hop_mac, egress_port, egress_mac)
                 # TODO: Add table entries to "MyIngress.dmac_forward"
                 # They represent the dstMAC to egress port and MAC mapping.
                 # 1. Use p4info_helper's buildTableEntry() method to build a table_entry
                 # 2. Add the table_entry to the switch by calling s1's WriteTableEntry() method
-    
+                dmac_forward_entry = p4info_helper.buildTableEntry("myIngress.dmac_forward", match_fields = {"hdr.ethernet.dst"}, action_name = "forward_to_port", action_params = {"egress_port": egress_port; "egress_mac": egress_mac })
+                s1.WriteTableEntry(dmac_forward_entry)
+
     except KeyboardInterrupt:
         print(" Shutting down.")
     except grpc.RpcError as e:
