@@ -9,12 +9,26 @@
 typedef bit<48> macAddr_t;
 typedef bit<32> ipAddr_t;
 header ethernet_t {
-    /* TODO: define Ethernet header */ 
+    macAddr_t dst;
+    macAddr_t src;
+    bit<16>   etherType;
 }
 
 /* a basic ip header without options and pad */
 header ipv4_t {
     /* TODO: define IP header */ 
+    bit<4>    version;
+    bit<4>    HLen;
+    bit<8>    TOS;
+    bit<16>   len;
+    bit<16>   ident;
+    bit<3>    flags;
+    bit<13>   offset;
+    bit<8>    ttl;
+    bit<8>    protocol;
+    bit<16>   checksum;
+    ipAddr_t  srcIP;
+    ipAddr_t  dstIP;
 }
 
 struct metadata {
@@ -46,6 +60,17 @@ parser MyParser(packet_in packet,
     state parse_ethernet {
         /* TODO: do ethernet header parsing */
         /* if the frame type is IPv4, go to IPv4 parsing */ 
+        
+        packet.extract(ethernetHeader);
+
+        // Set the extracted Ethernet header to hdr
+        hdr.ethernet = ethernetHeader;
+
+        // Check if the Ethernet frame type is IPv4
+        if (ethernetHeader.etherType == 0x0800) {
+            transition parse_ipv4;
+        } 
+        
     }
 
     state parse_ipv4 {
@@ -87,6 +112,7 @@ control MyIngress(inout headers hdr,
    
     action decrement_ttl() {
         /* TODO: decrement the IPv4 header's TTL field by one */
+        hdr.ipv4.ttl--;
     }
 
     action forward_to_next_hop(ipAddr_t next_hop){
@@ -102,6 +128,15 @@ control MyIngress(inout headers hdr,
         /* TODO: define a static ipv4 routing table */
         /* Perform longest prefix matching on dstIP then */
         /* record the next hop IP address in the metadata's next_hop field*/
+        
+        // what is this action supposed to be?
+        // https://github.com/jafingerhut/p4-guide/blob/master/docs/p4-table-behaviors.md
+        // looks like lpm?
+        key = { hdr.ipv4.dstIP: lpm; }
+
+        actions = { forward_to_next_hop; drop; }
+
+        default_action = drop;
     }
 
     /* define static ARP table */
@@ -109,6 +144,12 @@ control MyIngress(inout headers hdr,
         /* TODO: define a static ARP table */
         /* Perform exact matching on metadata's next_hop field then */
         /* modify the packet's src and dst MAC addresses upon match */
+
+        key = { meta.next_hop: exact; }
+    
+        actions = { change_dst_mac; drop; }
+
+        default_action = drop;
     }
 
 
@@ -117,6 +158,12 @@ control MyIngress(inout headers hdr,
         /* TODO: define a static forwarding table */
         /* Perform exact matching on dstMAC then */
         /* forward to the corresponding egress port */ 
+
+        key = { hdr.ethernet.dst: exact; }
+
+        actions = { forward_to_port; drop; }
+
+        default_action = drop;
     }
    
     /* applying dmac */
@@ -125,7 +172,15 @@ control MyIngress(inout headers hdr,
         /* 1. Lookup IPv4 routing table */
         /* 2. Upon hit, lookup ARP table */
         /* 3. Upon hit, Decrement ttl */
-        /* 4. Then lookup forwarding table */  
+        /* 4. Then lookup forwarding table */
+
+        if (ipv4_route.apply().hit) {
+            if (arp_table.apply().hit) {
+                decrement_ttl();
+                dmac_forward.apply();
+            }
+        }
+
     }
 }
 
