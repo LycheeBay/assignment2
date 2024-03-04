@@ -80,7 +80,7 @@ control MyIngress(inout headers hdr,
         mac_learn_digest_t mac_learn_msg;
         /* TODO: Fill the digest message with srcMAC and ingress port */
         
-        mac_learn_msg.srcMAC = hdr.src;
+        mac_learn_msg.srcMAC = hdr.ethernet.src;
         mac_learn_msg.port   = standard_metadata.ingress_port;
 
         /* send the digest message to the controller */
@@ -99,6 +99,7 @@ control MyIngress(inout headers hdr,
 
         actions = {
             forward_to_port;
+            broadcast;
         }
 
         default_action = broadcast;
@@ -110,9 +111,9 @@ control MyIngress(inout headers hdr,
         size = 4;
         support_timeout = true;
 
-        key = { standard_metadata.ingress_port: exact;  standard_metadata. }
+        key = { standard_metadata.ingress_port: exact; }
 
-        actions = { NoAction; }
+        actions = { NoAction; learn; }
 
         default_action = learn;
     }
