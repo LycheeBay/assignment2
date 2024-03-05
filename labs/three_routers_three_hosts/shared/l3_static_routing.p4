@@ -62,7 +62,10 @@ parser MyParser(packet_in packet,
         /* if the frame type is IPv4, go to IPv4 parsing */ 
         
         packet.extract(hdr.ethernet);
-        transition parse_ipv4;
+        transition select(hdr.ethernet.etherType) {
+            0x800: parse_ipv4;
+            default: accept;
+        }
     }
 
     state parse_ipv4 {
@@ -83,9 +86,13 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
         verify_checksum(true, {
             hdr.ipv4.ver,
             hdr.ipv4.hlen,
-            hdr.ipv4.flags,
-            hdr.ipv4.ident,
+            hdr.ipv4.TOS,
             hdr.ipv4.len,
+            hdr.ipv4.ident,
+            hdr.ipv4.flags,
+            hdr.ipv4.offset,
+            hdr.ipv4.ttl,
+            hdr.ipv4.protocol,
             hdr.ipv4.srcIP,
             hdr.ipv4.dstIP
         }, hdr.ipv4.checksum, HashAlgorithm.csum16);
@@ -111,7 +118,7 @@ control MyIngress(inout headers hdr,
         /* TODO: change the packet's source MAC address to egress_mac */
         /* Then set the egress port in the packet's standard_metadata to egress_port */
         hdr.ethernet.src = egress_mac;
-        standard_metadata.egress_port = egress_port;
+        standard_metadata.egress_spec = egress_port;
     }
    
     action decrement_ttl() {
@@ -211,6 +218,19 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
         /* TODO: calculate the modified packet's checksum */
         /* using update_checksum() extern */
         /* Use HashAlgorithm.csum16 as a hash algorithm */
+        update_checksum(true, {
+            hdr.ipv4.ver,
+            hdr.ipv4.hlen,
+            hdr.ipv4.TOS,
+            hdr.ipv4.len,
+            hdr.ipv4.ident,
+            hdr.ipv4.flags,
+            hdr.ipv4.offset,
+            hdr.ipv4.ttl,
+            hdr.ipv4.protocol,
+            hdr.ipv4.srcIP,
+            hdr.ipv4.dstIP
+        }, hdr.ipv4.checksum, HashAlgorithm.csum16);
     } 
 }
 
