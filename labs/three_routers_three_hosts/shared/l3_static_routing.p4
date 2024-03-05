@@ -17,8 +17,8 @@ header ethernet_t {
 /* a basic ip header without options and pad */
 header ipv4_t {
     /* TODO: define IP header */ 
-    bit<4>    version;
-    bit<4>    HLen;
+    bit<4>    ver;
+    bit<4>    hlen;
     bit<8>    TOS;
     bit<16>   len;
     bit<16>   ident;
@@ -61,16 +61,8 @@ parser MyParser(packet_in packet,
         /* TODO: do ethernet header parsing */
         /* if the frame type is IPv4, go to IPv4 parsing */ 
         
-        packet.extract(ethernetHeader);
-
-        // Set the extracted Ethernet header to hdr
-        hdr.ethernet = ethernetHeader;
-
-        // Check if the Ethernet frame type is IPv4
-        if (ethernetHeader.etherType == 0x0800) {
-            transition parse_ipv4;
-        } 
-        
+        packet.extract(hdr.ethernet);
+        transition parse_ipv4;
     }
 
     state parse_ipv4 {
@@ -92,7 +84,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
             hdr.ipv4.ver,
             hdr.ipv4.hlen,
             hdr.ipv4.flags,
-            hdr.ipv4.id,
+            hdr.ipv4.ident,
             hdr.ipv4.len,
             hdr.ipv4.srcIP,
             hdr.ipv4.dstIP
@@ -124,12 +116,12 @@ control MyIngress(inout headers hdr,
    
     action decrement_ttl() {
         /* TODO: decrement the IPv4 header's TTL field by one */
-        hdr.ipv4.ttl--;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action forward_to_next_hop(ipAddr_t next_hop){
         /* TODO: write next_hop to metadata's next_hop field */
-        metadata.next_hop = next_hop;
+        meta.next_hop = next_hop;
     }
 
     action change_dst_mac (macAddr_t dst_mac) {
