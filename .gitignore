@@ -3,6 +3,7 @@ labs/star_four_hosts/shared/utils/p4runtime_lib/__pycache__/
 labs/three_routers_three_hosts/shared/*.txt
 labs/three_routers_three_hosts/shared/*.p4i
 labs/three_routers_three_hosts/shared/*.json
+labs/star_four_hosts/shared/core.340
 .txt
 .p4i
 .json
