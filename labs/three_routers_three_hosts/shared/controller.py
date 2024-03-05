@@ -69,7 +69,7 @@ def main(p4info_file_path, bmv2_file_path, routing_info):
                 # They represent the dstMAC to egress port and MAC mapping.
                 # 1. Use p4info_helper's buildTableEntry() method to build a table_entry
                 # 2. Add the table_entry to the switch by calling s1's WriteTableEntry() method
-                dmac_forward_entry = p4info_helper.buildTableEntry("myIngress.dmac_forward", match_fields = {"hdr.ethernet.dst"}, action_name = "forward_to_port", action_params = {"egress_port": egress_port; "egress_mac": egress_mac })
+                dmac_forward_entry = p4info_helper.buildTableEntry("myIngress.dmac_forward", match_fields = {"hdr.ethernet.dst"}, action_name = "forward_to_port", action_params = {"egress_port": egress_port, "egress_mac": egress_mac })
                 s1.WriteTableEntry(dmac_forward_entry)
 
     except KeyboardInterrupt:
